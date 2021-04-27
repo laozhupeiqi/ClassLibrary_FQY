@@ -10,7 +10,7 @@ using System.Windows.Forms.DataVisualization.Charting;
 namespace ClassLibrary_FQY
 {
     /// <summary>
-    /// Chart控件初始化l类
+    /// Chart控件初始化类
     /// </summary>
     public class ChartHelper
     {
@@ -79,6 +79,7 @@ namespace ClassLibrary_FQY
             chart.Legends[0].Alignment = align;
             chart.Legends[0].BackColor = backColor;
             chart.Legends[0].ForeColor = foreColor;
+            
         }
         /// <summary>
         /// 图表区 设置XY轴
