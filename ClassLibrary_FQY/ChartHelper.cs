@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Drawing;
 using System.Windows.Forms.DataVisualization.Charting;
-
 
 namespace ClassLibrary_FQY
 {
     /// <summary>
-    /// Chart控件初始化l类
+    /// Chart控件初始化类
     /// </summary>
     public class ChartHelper
     {
@@ -25,9 +19,10 @@ namespace ClassLibrary_FQY
         /// <param name="showValue">是否显示数值</param>
         public static void AddSeries(Chart chart, string seriesName, SeriesChartType chartType, Color color, Color markColor, bool showValue = false)
         {
+            chart.Series.Clear();
             chart.Series.Add(seriesName);
-            chart.Series[seriesName].ChartType = chartType;
-            chart.Series[seriesName].Color = color;
+            chart.Series[seriesName].ChartType = chartType;//设置曲线类型
+            chart.Series[seriesName].Color = color;//设置曲线颜色
             if (showValue)
             {
                 chart.Series[seriesName].IsValueShownAsLabel = true;
@@ -37,6 +32,7 @@ namespace ClassLibrary_FQY
                 chart.Series[seriesName].LabelAngle = -90;
             }
         }
+
         /// <summary>
         /// 设置标题
         /// </summary>
@@ -53,6 +49,7 @@ namespace ClassLibrary_FQY
             chart.Titles[0].Docking = docking;
             chart.Titles[0].ForeColor = foreColor;
         }
+
         /// <summary>
         /// 设置样式
         /// </summary>
@@ -65,6 +62,7 @@ namespace ClassLibrary_FQY
             chart.ChartAreas[0].BackColor = backColor;
             chart.ForeColor = foreColor;
         }
+
         /// <summary>
         /// 设置图例
         /// </summary>
@@ -80,6 +78,7 @@ namespace ClassLibrary_FQY
             chart.Legends[0].BackColor = backColor;
             chart.Legends[0].ForeColor = foreColor;
         }
+
         /// <summary>
         /// 图表区 设置XY轴
         /// </summary>
@@ -92,7 +91,7 @@ namespace ClassLibrary_FQY
         /// <param name="arrowStyle">坐标轴箭头样式</param>
         /// <param name="xInterval">X轴的间距</param>
         /// <param name="yInterval">Y轴的间距</param>
-        public static void SetXY(Chart chart, string xTitle, string yTitle, string Format, DateTimeIntervalType Intervaltype, double Interval,bool enable, double Minimum, double Maximum)
+        public static void SetXY(Chart chart, string xTitle, string yTitle, string Format, DateTimeIntervalType Intervaltype, double Interval, bool enable, double Minimum, double Maximum)
         {
             chart.ChartAreas[0].AxisX.Title = xTitle;
             chart.ChartAreas[0].AxisY.Title = yTitle;
@@ -103,6 +102,7 @@ namespace ClassLibrary_FQY
             chart.ChartAreas[0].AxisX.Minimum = Minimum;
             chart.ChartAreas[0].AxisY.Maximum = Maximum;
         }
+
         /// <summary>
         ///  图表区设置网格
         /// </summary>
@@ -114,15 +114,17 @@ namespace ClassLibrary_FQY
             chart.ChartAreas[0].AxisX.MajorGrid.IntervalType = Intervaltype;
             chart.ChartAreas[0].AxisX.MajorGrid.Interval = xInterval;
         }
+
         /// <summary>
         /// 图表区设置X轴滚动轴
         /// </summary>
         /// <param name="chart">图表对象</param>
         /// <param name="IsPositionedInside">指示滚动条处于内部或外部图表区</param>
-        public static void SetScrollBar(Chart chart,bool IsPositionedInside)
+        public static void SetScrollBar(Chart chart, bool IsPositionedInside)
         {
             chart.ChartAreas[0].AxisX.ScrollBar.IsPositionedInside = IsPositionedInside;
         }
+
         /// <summary>
         /// 图表区设置显示区域
         /// </summary>
@@ -140,14 +142,13 @@ namespace ClassLibrary_FQY
         /// <param name="enable">启用/禁用游标用户界面和图表区范围选择用户界面</param>
         /// <param name="Interval">游标移动间隔</param>
         /// <param name="Intervaltype">游标移动间隔类型</param>
-        public static void SetCursorX(Chart chart,bool enable,int Interval, DateTimeIntervalType Intervaltype)
+        public static void SetCursorX(Chart chart, bool enable, int Interval, DateTimeIntervalType Intervaltype)
         {
             chart.ChartAreas[0].CursorX.IsUserEnabled = enable;
             chart.ChartAreas[0].CursorX.IsUserSelectionEnabled = enable;
             chart.ChartAreas[0].CursorX.Interval = Interval;
             chart.ChartAreas[0].CursorX.IntervalOffset = Interval;
             chart.ChartAreas[0].CursorX.IntervalType = Intervaltype;
-
         }
     }
 }
