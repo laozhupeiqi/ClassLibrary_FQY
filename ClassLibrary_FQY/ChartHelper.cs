@@ -77,6 +77,7 @@ namespace ClassLibrary_FQY
             chart.Legends[0].Alignment = align;
             chart.Legends[0].BackColor = backColor;
             chart.Legends[0].ForeColor = foreColor;
+            
         }
 
         /// <summary>
