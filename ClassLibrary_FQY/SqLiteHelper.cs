@@ -1,4 +1,5 @@
-﻿using System.Data.SQLite;
+﻿using System;
+using System.Data.SQLite;
 
 namespace ClassLibrary_FQY
 {
@@ -75,7 +76,7 @@ namespace ClassLibrary_FQY
             {
                
             }
-
+            
             return dataReader;
         }
 
@@ -111,7 +112,20 @@ namespace ClassLibrary_FQY
         /// <returns></returns>
         public SQLiteDataReader ReadFullTable(string tableName)
         {
-            string queryString = "SELECT rowid, * FROM " + tableName;
+            string queryString = "SELECT rowid, * FROM " + tableName + " ORDER BY rowid DESC";
+            return ExecuteReader(queryString);
+        }
+
+        /// <summary>
+        /// 按照日期筛选读取整张数据表
+        /// </summary>
+        /// <param name="tableName"></param>
+        /// <param name="StartTime"></param>
+        /// <param name="EndTime"></param>
+        /// <returns></returns>
+        public SQLiteDataReader ReadFullTable(string tableName, string StartTime, string EndTime)
+        {
+            string queryString = "select * from " + tableName + " where 日期时间 between " + StartTime + " and " + EndTime;
             return ExecuteReader(queryString);
         }
 
@@ -130,6 +144,15 @@ namespace ClassLibrary_FQY
             }
             queryString += " )";
             ExecuteQuery(queryString);
+        }
+
+        /// <summary>
+        /// 编辑SQL语句
+        /// </summary>
+        /// <param name="sql"></param>
+        public void Sql_cmd(string sql)
+        {
+            ExecuteReader(sql);
         }
 
         /// <summary>
