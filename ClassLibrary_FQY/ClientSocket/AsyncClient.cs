@@ -7,6 +7,10 @@ namespace ClassLibrary_FQY.ClientSocket
 {
     public class AsyncClient
     {
+        //发送计数
+        private int bytesSend = 0;
+
+
         //定义委托
         public delegate void OnReceiveData(byte[] buff);
 
@@ -81,7 +85,7 @@ namespace ClassLibrary_FQY.ClientSocket
             catch
             {
 
-               
+
             }
         }
         /// <summary>
@@ -98,7 +102,7 @@ namespace ClassLibrary_FQY.ClientSocket
                 // Read data from the remote device.  
                 int bytesRead = socket.EndReceive(ar);
 
-                if (bytesRead>0)
+                if (bytesRead > 0)
                 {
                     state.sb.Append(Encoding.ASCII.GetString(state.buffer, 0, bytesRead));
                     byte[] buf = new byte[bytesRead];
@@ -111,46 +115,48 @@ namespace ClassLibrary_FQY.ClientSocket
                 // Get the rest of the data
                 socket.BeginReceive(state.buffer, 0, StateObject.BufferSize, 0, new AsyncCallback(ReceiveCallback), state);
             }
-            catch 
+            catch
             {
 
-              
+
             }
         }
         /// <summary>
         /// 异步发送函数
         /// </summary>
         /// <param name="data">要发送的数据</param>
-        public void SendAsync(byte[] data)
+        /// <returns>返回发送的数据个数</returns>
+        public int SendAsync(byte[] data)
         {
             try
             {
                 Socket socket = StateObject.worksocket;
-                socket.BeginSend(data, 0, data.Length, 0, new AsyncCallback(SendCallback), socket);
+                if (socket != null)
+                {
+                    //使用lambda表达式表示异步回调函数
+                    socket.BeginSend(data, 0, data.Length, SocketFlags.None, ar =>
+                    {
+                        try
+                        {
+                            socket = (Socket)ar.AsyncState;
+                            // Complete sending the data to the remote device.  
+                            bytesSend = socket.EndSend(ar);
+                        }
+                        catch
+                        {
+                            bytesSend = -1;
+                        }
+                    }, socket);
+                }
+
+                return bytesSend;
             }
             catch
             {
+                return -1;
+            }
 
-                
-            }
         }
-        /// <summary>
-        /// 异步发送回调函数
-        /// </summary>
-        /// <param name="ar"></param>
-        private void SendCallback(IAsyncResult ar)
-        {
-            try
-            {
-                Socket socket = (Socket)ar.AsyncState;
-                // Complete sending the data to the remote device.  
-                int bytesSend = socket.EndSend(ar);
-            }
-            catch 
-            {
 
-                
-            }
-        }
     }
 }
