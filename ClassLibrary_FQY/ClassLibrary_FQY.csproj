@@ -99,6 +99,10 @@
     <Compile Include="mysqlHelper.cs" />
     <Compile Include="OfficeHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ServerSocket\AsyncUserToken.cs" />
+    <Compile Include="ServerSocket\BufferManager.cs" />
+    <Compile Include="ServerSocket\SocketAsyncEventArgsPool.cs" />
+    <Compile Include="ServerSocket\SocketManager.cs" />
     <Compile Include="SqLiteHelper.cs" />
   </ItemGroup>
   <ItemGroup>
