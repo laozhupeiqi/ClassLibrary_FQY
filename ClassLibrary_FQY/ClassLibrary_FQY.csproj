@@ -103,6 +103,8 @@
     <Compile Include="ServerSocket\BufferManager.cs" />
     <Compile Include="ServerSocket\SocketAsyncEventArgsPool.cs" />
     <Compile Include="ServerSocket\SocketManager.cs" />
+    <Compile Include="ServerSocket\SocketManager_Free.cs" />
+    <Compile Include="ServerSocket\SocketManager_ModbusTCP.cs" />
     <Compile Include="SqLiteHelper.cs" />
   </ItemGroup>
   <ItemGroup>
