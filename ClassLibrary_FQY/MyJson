@@ -1,0 +1,214 @@
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.IO;
+
+namespace CustomControl
+{
+    /// <summary>
+    /// Json工具类，线程不安全，自动根据当前项目名创建Json文件
+    /// </summary>
+    public class MyJson
+    {
+        FileStream jsonFile;
+        StreamWriter writer;
+        StreamReader reader;
+
+        public MyJson(string jsonFilePath)
+        {
+            bool haveFile = false;
+            if (File.Exists(jsonFilePath))
+            {
+                haveFile = true;
+            }
+
+            jsonFile = new FileStream(jsonFilePath, FileMode.OpenOrCreate, FileAccess.ReadWrite, FileShare.Read);
+            writer = new StreamWriter(jsonFile);
+            reader = new StreamReader(jsonFile);
+
+            if (!haveFile)
+            {
+                //没有文件就写入一个空Json类
+                jsonFile.Position = 0;
+                jsonFile.SetLength(0);
+                writer.Write(JsonConvert.SerializeObject(new JObject(), Formatting.Indented));
+                writer.Flush();
+                jsonFile.Position = 0;
+            }
+            else
+            {
+                try
+                {
+                    jsonFile.Position = 0;
+                    JObject jObject = JsonConvert.DeserializeObject<JObject>(reader.ReadToEnd());
+                    jsonFile.Position = 0;
+                }
+                catch (Exception)
+                {
+                    //解析为Json类失败就写入一个空Json类覆盖
+                    jsonFile.Position = 0;
+                    jsonFile.SetLength(0);
+                    writer.Write(JsonConvert.SerializeObject(new JObject(), Formatting.Indented));
+                    writer.Flush();
+                    jsonFile.Position = 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 插入数据，有此属性则更新，无此属性则添加，若文件无法解析，则创建新的空白文件并插入数据
+        /// </summary>
+        /// <param name="key">Json类的属性名</param>
+        /// <param name="value">Json类的属性值</param>
+        public void InsertValue(string key, JToken value)
+        {
+            //插入值是否相同
+            bool IsSame = false;
+
+            JObject jObject = null;
+
+            jsonFile.Position = 0;
+            string resultString = reader.ReadToEnd();
+            jsonFile.Position = 0;
+
+            try
+            {
+                jObject = JsonConvert.DeserializeObject<JObject>(resultString);
+            }
+            catch (Exception)
+            {
+                jObject = new JObject();
+            }
+
+            if (jObject.Property(key) != null)
+            {
+                //JObject[key]的HasValues方法可以判断属性是否为数组、集合、其他类等有子元素的项
+                if (jObject[key].ToString() != value.ToString())
+                {
+                    jObject[key] = value;
+                }
+                else
+                {
+                    IsSame = true;
+                }
+            }
+            else
+            {
+                jObject.Add(key, value);
+            }
+
+            if (!IsSame)
+            {
+                string requestString = JsonConvert.SerializeObject(jObject, Formatting.Indented);
+
+                jsonFile.Position = 0;
+                jsonFile.SetLength(0);
+                writer.Write(requestString);
+                writer.Flush();
+                jsonFile.Position = 0;
+            }
+        }
+
+        /// <summary>
+        /// 读取数据，JObject[key]的HasValues方法可以判断属性是否为数组、集合、其他类等有子元素的项，
+        /// 若文件无法解析或无此属性，则返回null，若存在此属性且属性值为null或空字符串，则返回空字符串
+        /// </summary>
+        /// <param name="key">Json类的属性名</param>
+        /// <returns>若文件无法解析或无此属性，则返回null，若存在此属性且属性值为null或空字符串，则返回空字符串</returns>
+        public string ReadValue(string key)
+        {
+            string temp = null;
+            JObject jObject = null;
+
+            jsonFile.Position = 0;
+            string resultString = reader.ReadToEnd();
+            jsonFile.Position = 0;
+
+            try
+            {
+                jObject = JsonConvert.DeserializeObject<JObject>(resultString);
+            }
+            catch (Exception)
+            {
+
+            }
+
+            if (jObject?.Property(key) != null)
+            {
+                temp = jObject[key].ToString();
+            }
+
+            return temp;
+        }
+
+        /// <summary>
+        /// 删除数据
+        /// </summary>
+        /// <param name="key">Json类的属性名</param>
+        /// <returns>如果删除成功返回true，如果文件无法解析或无此属性返回false</returns>
+        public bool DeleteProperty(string key)
+        {
+            bool IsSuccess = false;
+            JObject jObject = null;
+
+            jsonFile.Position = 0;
+            string resultString = reader.ReadToEnd();
+            jsonFile.Position = 0;
+
+            try
+            {
+                jObject = JsonConvert.DeserializeObject<JObject>(resultString);
+            }
+            catch (Exception)
+            {
+
+            }
+
+            if (jObject?.Property(key) != null)
+            {
+                jObject.Remove(key);
+
+                string requestString = JsonConvert.SerializeObject(jObject, Formatting.Indented);
+
+                jsonFile.Position = 0;
+                jsonFile.SetLength(0);
+                writer.Write(requestString);
+                writer.Flush();
+                jsonFile.Position = 0;
+
+                IsSuccess = true;
+            }
+            return IsSuccess;
+        }
+
+        /// <summary>
+        /// 清除所有数据
+        /// </summary>
+        public void DeleteAllProperty()
+        {
+            JObject jObject = null;
+
+            jsonFile.Position = 0;
+            string resultString = reader.ReadToEnd();
+            jsonFile.Position = 0;
+
+            try
+            {
+                jObject = JsonConvert.DeserializeObject<JObject>(resultString);
+                jObject.RemoveAll();
+            }
+            catch (Exception)
+            {
+                jObject = new JObject();
+            }
+
+            string requestString = JsonConvert.SerializeObject(jObject, Formatting.Indented);
+
+            jsonFile.Position = 0;
+            jsonFile.SetLength(0);
+            writer.Write(requestString);
+            writer.Flush();
+            jsonFile.Position = 0;
+        }
+    }
+}
