@@ -1,0 +1,146 @@
+using System;
+using System.Windows.Forms;
+
+namespace CustomControl
+{
+    /// <summary>
+    /// 自定义数字显示框，可开启自动存储功能
+    /// </summary>
+    public class CustomNumericUpDown : NumericUpDown
+    {
+        static string jsonFilePath;//存储值路径
+        static MyJson NumericJson;
+        static CustomNumericUpDown()
+        {
+            jsonFilePath = Application.ProductName + "_NumericUpDown_StoredValue.json";//存储值路径赋值
+            NumericJson = new MyJson(jsonFilePath);
+        }
+
+        /// <summary>
+        /// 延迟初始化定时器
+        /// </summary>
+        Timer timer;
+
+        /// <summary>
+        /// 当前对象的ID，使用应用名、窗体名和控件名组合而成，hashCode会变化，故不采用
+        /// </summary>
+        string thisName;
+
+        public CustomNumericUpDown()
+        {
+            this.Maximum = decimal.MaxValue;
+            this.Minimum = decimal.MinValue;
+
+            timer = new Timer();
+            timer.Tick += Timer_Tick;
+            timer.Interval = 300;
+            timer.Start();
+        }
+
+        /// <summary>
+        /// 缓存值，保存上一次的合法值，若新输入值不符合上下限，则恢复缓存值为显示值
+        /// </summary>
+        private decimal ValueTemp = 0;
+
+        /// <summary>
+        /// 最小值，若低于最小值则弹窗提示
+        /// </summary>
+        public decimal MinValue
+        {
+            get { return _MinValue; }
+            set
+            {
+                _MinValue = value;
+                ValueTemp = value;
+            }
+        }
+        private decimal _MinValue;
+
+        /// <summary>
+        /// 最大值，若高于最大值则弹窗提示
+        /// </summary>
+        public decimal MaxValue { get; set; } = 1000;
+
+        /// <summary>
+        /// 是否自动存储值，默认开启
+        /// </summary>
+        public bool IsAutoStoredValue { get; set; } = true;
+
+        /// <summary>
+        /// 是否自动读取值，默认开启
+        /// </summary>
+        public bool IsAutoReadValue { get; set; } = true;
+
+        /// <summary>
+        /// 使用定时器延时初始化，否则当前控件名无法读取，且初始化Value值与控件默认值会冲突
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Timer_Tick(Object sender, EventArgs e)
+        {
+            thisName = Application.ProductName + this.ParentForm.Text + this.Name;
+
+            if (IsAutoReadValue)
+            {
+                //thisName设置完成，可以读取
+                string resultString = NumericJson.ReadValue(thisName);
+                if (resultString == null)
+                {
+                    this.Value = MinValue;
+                }
+                else
+                {
+                    decimal readTemp;
+                    decimal.TryParse(resultString, out readTemp);
+                    this.Value = readTemp;
+                }
+            }
+
+            //如果读取的值符合上下限，则更新缓存值，否则将缓存值设为显示值
+            if (this.Value <= MaxValue && this.Value >= MinValue)
+            {
+                ValueTemp = this.Value;
+            }
+            else
+            {
+                this.Value = ValueTemp;
+            }
+
+            //添加“值改变”事件
+            this.ValueChanged += new System.EventHandler(this.On_NumericUpDown_ValueChanged);
+            //初始化完成，关闭定时器
+            timer.Stop();
+        }
+
+        /// <summary>
+        /// 值改变时，判断是否符合上下限
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void On_NumericUpDown_ValueChanged(object sender, EventArgs e)
+        {
+            if (this.Value > MaxValue || this.Value < MinValue)
+            {
+                this.Value = ValueTemp;
+                MessageBox.Show(this.Parent.Text + "输入值超出范围");
+            }
+            else
+            {
+                ValueTemp = this.Value;
+
+                if (IsAutoStoredValue)
+                {
+                    NumericJson.InsertValue(thisName, this.Value);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 手动存储
+        /// </summary>
+        public void Save()
+        {
+            NumericJson.InsertValue(thisName, this.Value);
+        }
+    }
+}
